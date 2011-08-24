@@ -263,6 +263,25 @@ class Object(object):
             return result
         return proxy
 
+    def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
+        if domain is None:
+            domain = []
+        if fields is None:
+            fields = []
+        if limit is None:
+            limit = self.search_count(domain)
+            
+        arguments = [ domain, offset, limit, ]
+        
+        if order is not None:
+            arguments.append(order)
+        
+        record_ids = self.search(*arguments)
+            
+        records = self.read(record_ids, fields)
+       
+        return records
+
 def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
                  login=None, password=None, user_id=None):
     if port == 'auto':
