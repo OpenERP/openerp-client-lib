@@ -6,7 +6,7 @@ First install the library: ::
 
     sudo easy_install openerp-client-lib
 
-Now get inspired by the following describing a simple interaction with an OpenERP server: ::
+Now get inspired by the following script describing a simple interaction with an OpenERP server: ::
 
     import openerplib
 
