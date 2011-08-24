@@ -1,1 +1,14 @@
-This is a test readme.
+
+Sample interaction with an OpenERP server: ::
+
+    import openerplib
+
+    connection = openerplib.get_connection(hostname="localhost", database="my_db", \
+        login="my_user", password="xxx")
+    user_obj = connection.get_object("res.users")
+    ids = user_obj.search([("login", "=", "admin")])
+    user_info = user_obj.read(ids[0], ["name"])
+    print user_info["name"]
+
+This code will print "Administrator".
+

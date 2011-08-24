@@ -19,6 +19,10 @@
 ##############################################################################
 
 from distutils.core import setup
+import os.path
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='openerp-client-lib',
       version='1.0.0',
@@ -27,4 +31,5 @@ setup(name='openerp-client-lib',
       author_email='niv@openerp.com',
       url='',
       packages=["openerplib"],
+      long_description=read("README"),
      )

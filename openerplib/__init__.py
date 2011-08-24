@@ -219,7 +219,7 @@ class Connection(object):
         return Object(self, model)
 
     def get_service(self, service_name):
-        return Service(self, service_name)
+        return Service(self.connector, service_name)
 
 class Object(object):
     """
