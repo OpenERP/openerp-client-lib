@@ -1,5 +1,12 @@
 
-Sample interaction with an OpenERP server: ::
+OpenERP Client Library Guide
+============================
+
+First install the library: ::
+
+    sudo easy_install openerp-client-lib
+
+Now get inspired by the following describing a simple interaction with an OpenERP server: ::
 
     import openerplib
 
@@ -9,6 +16,6 @@ Sample interaction with an OpenERP server: ::
     ids = user_obj.search([("login", "=", "admin")])
     user_info = user_obj.read(ids[0], ["name"])
     print user_info["name"]
+    # will print "Administrator"
 
-This code will print "Administrator".
 
