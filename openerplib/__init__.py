@@ -253,32 +253,16 @@ class Object(object):
                                                     self.model,
                                                     method,
                                                     *args)
+            if method == "read":
+                if isinstance(result, list) and len(result) > 0 and "id" in result[0]:
+                    index = {}
+                    for i in xrange(len(result)):
+                        index[result[i]["id"]] = result[i]
+                    result = [index[x] for x in args[0]]
             self.__logger.debug('result: %r' % result)
             return result
         return proxy
 
-    def select(self, domain=None, fields=None, offset=0, limit=None, order=None):
-        if domain is None:
-            domain = []
-        if fields is None:
-            fields = []
-        if limit is None:
-            limit = self.search_count(domain)
-            
-        arguments = [ domain, offset, limit, ]
-        
-        if order is not None:
-            arguments.append(order)
-        
-        record_ids = self.search(*arguments)
-            
-        records = self.read(record_ids, fields)
-        if order is not None:
-            records.sort(lambda x, y: cmp(record_ids.index(x['id']),
-                                          record_ids.index(y['id'])))
-        
-        return records
-    
 def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
                  login=None, password=None, user_id=None):
     if port == 'auto':
