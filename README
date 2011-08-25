@@ -32,9 +32,9 @@ communication on port 6080: ::
 The get_model() method on the Connection object creates a Model object. That object represents a
 remote model on the OpenERP server (for OpenERP addon programmers, those are also called osv).
 Model objects are dynamic proxies, which means you can remotely call methods in a natural way.
-Here we demonstrate the usage of the search() and read() methods. That scenario is equivalent to
-the following interaction when you are coding an OpenERP addon and this code is executed on the
-server: ::
+In the previous script we demonstrate the usage of the search() and read() methods. That scenario
+is equivalent to the following interaction when you are coding an OpenERP addon and this code is
+executed on the server: ::
 
     user_osv = self.pool.get('res.users')
     ids = user_osv.search(cr, uid, [("login", "=", "admin")])
@@ -52,8 +52,9 @@ Here are also some considerations about coding using the OpenERP Client Library:
 
 - Since you are using remote procedure calls, every call is executed inside its own transaction. So it can
   be dangerous, for example, to code multiple interdependant row creations. You should consider coding a method 
-  inside an OpenERP addon that will be executed on the OpenERP server for such cases.
-- The browse() method can not be used. That method returns a dynamic proxy that lazy loads the rows data from
+  inside an OpenERP addon for such cases. That way it will be executed on the OpenERP server and so it will be
+  transactional.
+- The browse() method can not be used. That method returns a dynamic proxy that lazy loads the rows' data from
   the database. That behavior is not implemented in the OpenERP Client Library but it could be in future versions.
 
 
