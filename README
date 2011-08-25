@@ -51,10 +51,10 @@ Also note that coding using Model objects offer some syntaxic sugar compared to 
 Here are also some considerations regarding the coding using the OpenERP Client Library:
 
 - Since you are using remote procedure calls, every call is executed in it's own transaction. So it can
-be dangerous, for example, to code multiple inter-dependant row creations. You should consider coding a new
-OpenERP addon for such scenario.
+  be dangerous, for example, to code multiple inter-dependant row creations. You should consider coding a new
+  OpenERP addon for such scenario.
 - The browse() method can not be used. That method returns a dynamic proxy that lazy loads the rows data from
-the database. That behavior was not implemented in the OpenERP Client Library but it could be in future versions.
+  the database. That behavior was not implemented in the OpenERP Client Library but it could be in future versions.
 
 
 
