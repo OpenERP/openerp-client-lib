@@ -12,7 +12,7 @@ Now get inspired by the following script describing a simple interaction with an
 
     connection = openerplib.get_connection(hostname="localhost", database="my_db", \
         login="my_user", password="xxx")
-    user_obj = connection.get_object("res.users")
+    user_obj = connection.get_model("res.users")
     ids = user_obj.search([("login", "=", "admin")])
     user_info = user_obj.read(ids[0], ["name"])
     print user_info["name"]

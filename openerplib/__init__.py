@@ -19,7 +19,7 @@
 ##############################################################################
 
 """
-OpenObject Client Library
+OpenERP Client Library
 """
 
 import xmlrpclib
@@ -45,28 +45,34 @@ def _getChildLogger(logger, subname):
 
 class Connector(object):
     """
-    Connector class
+    The base abstract class representing a connection to an OpenERP Server.
     """
 
     __logger = _getChildLogger(_logger, 'connector')
 
     def __init__(self, hostname, port):
         """
-        :param hostname: Host name of the server
-        :param port: Port for the connection to the server
+        Initilize by specifying an hostname and a port.
+        :param hostname: Host name of the server.
+        :param port: Port for the connection to the server.
         """
         self.hostname = hostname
         self.port = port
 
 class XmlRPCConnector(Connector):
     """
-    This class supports the XmlRPC protocol
+    A type of connector that uses the XMLRPC protocol.
     """
     PROTOCOL = 'xmlrpc'
     
     __logger = _getChildLogger(_logger, 'connector.xmlrpc')
 
     def __init__(self, hostname, port=8069):
+        """
+        Initialize by specifying the hostname and the port.
+        :param hostname: The hostname of the computer holding the instance of OpenERP.
+        :param port: The port used by the OpenERP instance for XMLRPC (default to 8069).
+        """
         Connector.__init__(self, hostname, port)
         self.url = 'http://%s:%d/xmlrpc' % (self.hostname, self.port)
 
@@ -76,12 +82,18 @@ class XmlRPCConnector(Connector):
         return getattr(service, method)(*args)
 
 class NetRPC_Exception(Exception):
+    """
+    Exception for NetRPC errors.
+    """
     def __init__(self, faultCode, faultString):
         self.faultCode = faultCode
         self.faultString = faultString
         self.args = (faultCode, faultString)
 
 class NetRPC:
+    """
+    Low level class for NetRPC protocol.
+    """
     def __init__(self, sock=None):
         if sock is None:
             self.sock = socket.socket(
@@ -143,11 +155,20 @@ class NetRPC:
             return res[0]
 
 class NetRPCConnector(Connector):
+    """
+    A type of connector that uses the NetRPC protocol.
+    """
+
     PROTOCOL = 'netrpc'
     
     __logger = _getChildLogger(_logger, 'connector.netrpc')
 
     def __init__(self, hostname, port=8070):
+        """
+        Initialize by specifying the hostname and the port.
+        :param hostname: The hostname of the computer holding the instance of OpenERP.
+        :param port: The port used by the OpenERP instance for NetRPC (default to 8070).
+        """
         Connector.__init__(self, hostname, port)
 
     def send(self, service_name, method, *args):
@@ -157,17 +178,23 @@ class NetRPCConnector(Connector):
         result = socket.myreceive()
         socket.disconnect()
         return result
-    
+
 class Service:
-    
+    """
+    A class to execute RPC calls on a specific service of the remote server.
+    """
     def __init__(self, connector, service_name):
+        """
+        :param connector: A valid Connector instance.
+        :param service_name: The name of the service on the remote server.
+        """
         self.connector = connector
         self.service_name = service_name
         self.__logger = _getChildLogger(_getChildLogger(_logger, 'service'),service_name)
         
     def __getattr__(self, method):
         """
-        :param method: The method for the linked object (search, read, write, unlink, create, ...)
+        :param method: The name of the method to execute on the service.
         """
         self.__logger.debug('method: %r', method)
         def proxy(*args):
@@ -182,7 +209,8 @@ class Service:
 
 class Connection(object):
     """
-    TODO: Document this class
+    A class to represent a connection with authentification to an OpenERP Server.
+    It also provides utility methods to interact with the server more easily.
     """
     __logger = _getChildLogger(_logger, 'connection')
 
@@ -192,54 +220,96 @@ class Connection(object):
                  password=None,
                  user_id=None):
         """
-        :param connector:
-        :param database:
-        :param login:
-        :param password:
+        Initialize with login information. The login information is facultative to allow specifying
+        it after the initialization of this object.
+
+        :param connector: A valid Connector instance to send messages to the remote server.
+        :param database: The name of the database to work on.
+        :param login: The login of the user.
+        :param password: The password of the user.
+        :param user_id: The user id is a number identifying the user. This is only useful if you
+        already know it, in most cases you don't need to specify it.
         """
         self.connector = connector
 
         self.set_login_info(database, login, password, user_id)
 
     def set_login_info(self, database, login, password, user_id=None):
+        """
+        Set login information after the initialisation of this object.
+
+        :param connector: A valid Connector instance to send messages to the remote server.
+        :param database: The name of the database to work on.
+        :param login: The login of the user.
+        :param password: The password of the user.
+        :param user_id: The user id is a number identifying the user. This is only useful if you
+        already know it, in most cases you don't need to specify it.
+        """
         self.database, self.login, self.password = database, login, password
 
         self.user_id = user_id
         
     def check_login(self, force=True):
+        """
+        Checks that the login information is valid. Throws an AuthentificationError if the
+        authentification fails.
+
+        :param force: Force to re-check even if this Connection was already validated previously.
+        Default to True.
+        """
         if self.user_id and not force:
             return
         
         self.user_id = self.get_service("common").login(self.database, self.login, self.password)
         if not self.user_id:
-            raise Exception("Authentification failure")
+            raise AuthentificationError("Authentification failure")
         self.__logger.debug("Authentified with user id %s" % self.user_id)
     
-    def get_object(self, model):
-        return Object(self, model)
+    """
+    Returns a Model instance to allow easy remote manipulation of an OpenERP model.
+    
+    :param model_name: The name of the model.
+    """
+    def get_model(self, model_name):
+        return Model(self, model_name)
 
+    """
+    Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
+    Please note this Connection instance does not need to have valid authenfication information since authentification
+    is only necessary for the "object" service that handles models.
+
+    :param service_name: The name of the service.
+    """
     def get_service(self, service_name):
         return Service(self.connector, service_name)
 
-class Object(object):
+class AuthentificationError(Exception):
     """
-    TODO: Document this class
+    An error thrown when an authentification to an OpenERP server failed.
+    """
+    pass
+
+class Model(object):
+    """
+    Useful class to dialog with one of the models provided by an OpenERP server.
+    An instance of this class depends on a Connection instance with valid authenfication information.
     """
 
-    def __init__(self, connection, model):
+    def __init__(self, connection, model_name):
         """
-        :param connection:
-        :param model:
+        :param connection: A valid Connection instance with correct authentification information.
+        :param model_name: The name of the model.
         """
         self.connection = connection
-        self.model = model
-        self.__logger = _getChildLogger(_getChildLogger(_logger, 'object'),model)
+        self.model_name = model_name
+        self.__logger = _getChildLogger(_getChildLogger(_logger, 'object'), model_name)
 
     def __getattr__(self, method):
         """
-        :param method: The method for the linked object (search, read, write, unlink, create, ...)
+        Provides proxy methods that will forward calls to the model on the remote OpenERP server.
+
+        :param method: The method for the linked model (search, read, write, unlink, create, ...)
         """
-        #self.__logger.debug('method: %r', method)
         def proxy(*args):
             """
             :param args: A list of values for the method
@@ -250,7 +320,7 @@ class Object(object):
                                                     self.connection.database,
                                                     self.connection.user_id,
                                                     self.connection.password,
-                                                    self.model,
+                                                    self.model_name,
                                                     method,
                                                     *args)
             if method == "read":
@@ -264,18 +334,50 @@ class Object(object):
         return proxy
 
     def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, context=None):
+        """
+        A shortcut method to combine a search() and a read().
+
+        :param domain: The domain for the search.
+        :param fields: The fields to extract (can be None or [] to extract all fields).
+        :param offset: The offset for the rows to read.
+        :param limit: The maximum number of rows to read.
+        :param order: The order to class the rows.
+        :param context: The context.
+        :return: A list of dictionaries containing all the specified fields.
+        """
         record_ids = self.search(domain or [], offset, limit or False, order or False, context or {})
         records = self.read(record_ids, fields or [], context or {})
         return records
 
-def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
-                 login=None, password=None, user_id=None):
+def get_connector(hostname, protocol="xmlrpc", port="auto"):
+    """
+    A shortcut method to easily create a connector to a remote server using XMLRPC or NetRPC.
+
+    :param hostname: The hostname to the remote server.
+    :param protocol: The name of the protocol, must be "xmlrpc" or "netrpc".
+    :param port: The number of the port. Defaults to auto.
+    """
     if port == 'auto':
         port = 8069 if protocol=="xmlrpc" else 8070
     if protocol == "xmlrpc":
-        return Connection(XmlRPCConnector(hostname, port), database, login, password, user_id)
+        return XmlRPCConnector(hostname, port)
     elif protocol == "netrpc":
-        return Connection(NetRPCConnector(hostname, port), database, login, password, user_id)
+        return NetRPCConnector(hostname, port)
     else:
         raise ValueError("You must choose xmlrpc or netrpc")
 
+def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
+                 login=None, password=None):
+    """
+    A shortcut method to easily create a connection to a remote OpenERP server.
+
+    :param hostname: The hostname to the remote server.
+    :param protocol: The name of the protocol, must be "xmlrpc" or "netrpc".
+    :param port: The number of the port. Defaults to auto.
+    :param connector: A valid Connector instance to send messages to the remote server.
+    :param database: The name of the database to work on.
+    :param login: The login of the user.
+    :param password: The password of the user.
+    """
+    return Connection(get_connector(hostname, protocol, port), database, login, password)
+        
