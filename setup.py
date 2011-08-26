@@ -32,4 +32,5 @@ setup(name='openerp-client-lib',
       url='',
       packages=["openerplib"],
       long_description=read("README"),
+      keywords="openerp library com communication rpc xml-rpc net-rpc xmlrpc python client lib web service",
      )

@@ -1,4 +1,9 @@
 
+The OpenERP Client Library is a Python library to communicate with an OpenERP Server using its Web
+Services in an user-friendly way. It was created for those that doesn't want to code XML-RPC calls
+on the bare metal. It handles XML-RPC as well as NET-RPC protocol and provides a bunch of syntaxic
+sugar to make things a lot easier.
+
 To consult the source code repository, report bugs or ask questions, see the Launchpad Project:
 
 http://launchpad.net/openerp-client-lib
@@ -24,7 +29,7 @@ Now copy-paste the following script describing a simple interaction with an Open
 
 In the previous script, the get_connection() method creates a Connection object that represents a
 communication channel with authentification to an OpenERP server. By default, get_connection() uses
-XMLRPC, but you can specify it to use NetRPC. You can also change the port. Example with a NetRPC
+XML-RPC, but you can specify it to use NetRPC. You can also change the port. Example with a NetRPC
 communication on port 6080: ::
 
     connection = openerplib.get_connection(hostname="localhost", protocol="netrpc", port=6080, ...)
