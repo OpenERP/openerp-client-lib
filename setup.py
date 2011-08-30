@@ -33,4 +33,9 @@ setup(name='openerp-client-lib',
       packages=["openerplib"],
       long_description=read("README"),
       keywords="openerp library com communication rpc xml-rpc net-rpc xmlrpc python client lib web service",
+      license="GNU Affero General Public License v3",
+      classifiers=[
+          "License :: OSI Approved :: GNU Affero General Public License v3",
+          "Programming Language :: Python",
+          ],
      )
