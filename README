@@ -1,6 +1,6 @@
 
-The OpenERP Client Library is a Python library to communicate with an OpenERP Server using its Web
-Services in an user-friendly way. It was created for those that doesn't want to code XML-RPC calls
+The OpenERP Client Library is a Python library to communicate with an OpenERP Server using its web
+services in an user-friendly way. It was created for those that doesn't want to code XML-RPC calls
 on the bare metal. It handles XML-RPC as well as NET-RPC protocol and provides a bunch of syntaxic
 sugar to make things a lot easier.
 
