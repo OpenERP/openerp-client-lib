@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
+# Copyright (C) Stephane Wirtel
+# Copyright (C) 2011 Nicolas Vanhoren
 # Copyright (C) 2011 OpenERP s.a. (<http://openerp.com>).
 # All rights reserved.
 # 
