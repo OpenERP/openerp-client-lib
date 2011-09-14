@@ -219,7 +219,7 @@ class Service(object):
 
 class Connection(object):
     """
-    A class to represent a connection with authentification to an OpenERP Server.
+    A class to represent a connection with authentication to an OpenERP Server.
     It also provides utility methods to interact with the server more easily.
     """
     __logger = _getChildLogger(_logger, 'connection')
@@ -261,8 +261,8 @@ class Connection(object):
         
     def check_login(self, force=True):
         """
-        Checks that the login information is valid. Throws an AuthentificationError if the
-        authentification fails.
+        Checks that the login information is valid. Throws an AuthenticationError if the
+        authentication fails.
 
         :param force: Force to re-check even if this Connection was already validated previously.
         Default to True.
@@ -271,12 +271,12 @@ class Connection(object):
             return
         
         if not self.database or not self.login or self.password is None:
-            raise AuthentificationError("Creditentials not provided")
+            raise AuthenticationError("Creditentials not provided")
         
         self.user_id = self.get_service("common").login(self.database, self.login, self.password)
         if not self.user_id:
-            raise AuthentificationError("Authentification failure")
-        self.__logger.debug("Authentified with user id %s" % self.user_id)
+            raise AuthenticationError("Authentication failure")
+        self.__logger.debug("Authenticated with user id %s" % self.user_id)
     
     """
     Returns a Model instance to allow easy remote manipulation of an OpenERP model.
@@ -288,7 +288,7 @@ class Connection(object):
 
     """
     Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
-    Please note this Connection instance does not need to have valid authenfication information since authentification
+    Please note this Connection instance does not need to have valid authentication information since authentication
     is only necessary for the "object" service that handles models.
 
     :param service_name: The name of the service.
@@ -296,21 +296,21 @@ class Connection(object):
     def get_service(self, service_name):
         return Service(self.connector, service_name)
 
-class AuthentificationError(Exception):
+class AuthenticationError(Exception):
     """
-    An error thrown when an authentification to an OpenERP server failed.
+    An error thrown when an authentication to an OpenERP server failed.
     """
     pass
 
 class Model(object):
     """
     Useful class to dialog with one of the models provided by an OpenERP server.
-    An instance of this class depends on a Connection instance with valid authenfication information.
+    An instance of this class depends on a Connection instance with valid authentication information.
     """
 
     def __init__(self, connection, model_name):
         """
-        :param connection: A valid Connection instance with correct authentification information.
+        :param connection: A valid Connection instance with correct authentication information.
         :param model_name: The name of the model.
         """
         self.connection = connection
