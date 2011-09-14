@@ -213,7 +213,7 @@ class Service(object):
             """
             self.__logger.debug('args: %r', args)
             result = self.connector.send(self.service_name, method, *args)
-            self.__logger.debug('result: %r' % result)
+            self.__logger.debug('result: %r', result)
             return result
         return proxy
 
@@ -276,7 +276,7 @@ class Connection(object):
         self.user_id = self.get_service("common").login(self.database, self.login, self.password)
         if not self.user_id:
             raise AuthenticationError("Authentication failure")
-        self.__logger.debug("Authenticated with user id %s" % self.user_id)
+        self.__logger.debug("Authenticated with user id %s", self.user_id)
     
     def get_model(self, model_name):
         """
@@ -342,7 +342,7 @@ class Model(object):
                     for i in result:
                         index[r['id']] = r
                     result = [index[x] for x in args[0]]
-            self.__logger.debug('result: %r' % result)
+            self.__logger.debug('result: %r', result)
             return result
         return proxy
 
