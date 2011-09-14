@@ -339,8 +339,8 @@ class Model(object):
             if method == "read":
                 if isinstance(result, list) and len(result) > 0 and "id" in result[0]:
                     index = {}
-                    for i in xrange(len(result)):
-                        index[result[i]["id"]] = result[i]
+                    for i in result:
+                        index[r['id']] = r
                     result = [index[x] for x in args[0]]
             self.__logger.debug('result: %r' % result)
             return result
