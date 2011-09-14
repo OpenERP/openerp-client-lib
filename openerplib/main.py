@@ -100,7 +100,7 @@ class NetRPC_Exception(Exception):
         self.faultString = faultString
         self.args = (faultCode, faultString)
 
-class NetRPC:
+class NetRPC(object):
     """
     Low level class for NetRPC protocol.
     """
@@ -189,7 +189,7 @@ class NetRPCConnector(Connector):
         socket.disconnect()
         return result
 
-class Service:
+class Service(object):
     """
     A class to execute RPC calls on a specific service of the remote server.
     """
