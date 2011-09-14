@@ -37,7 +37,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='openerp-client-lib',
-      version='1.0.1',
+      version='1.0.2',
       description='OpenERP Client Library allows to easily interact with OpenERP in Python.',
       author='Nicolas Vanhoren',
       author_email='niv@openerp.com',
