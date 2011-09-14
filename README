@@ -62,5 +62,11 @@ Here are also some considerations about coding using the OpenERP Client Library:
 - The browse() method can not be used. That method returns a dynamic proxy that lazy loads the rows' data from
   the database. That behavior is not implemented in the OpenERP Client Library but it could be in future versions.
 
+Changelog
+---------
+
+ - 1.0.2:
+
+   - added dates helper
 
 
