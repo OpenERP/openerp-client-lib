@@ -40,14 +40,12 @@ import socket
 
 try:
     import cPickle as pickle
-    pickle.__name__
-except:
+except ImportError:
     import pickle
 
 try:
     import cStringIO as StringIO
-    StringIO.__name__
-except:
+except ImportError:
     import StringIO
 
 _logger = logging.getLogger(__name__)
