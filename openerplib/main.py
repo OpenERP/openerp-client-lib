@@ -278,22 +278,22 @@ class Connection(object):
             raise AuthenticationError("Authentication failure")
         self.__logger.debug("Authenticated with user id %s" % self.user_id)
     
-    """
-    Returns a Model instance to allow easy remote manipulation of an OpenERP model.
-    
-    :param model_name: The name of the model.
-    """
     def get_model(self, model_name):
+        """
+        Returns a Model instance to allow easy remote manipulation of an OpenERP model.
+
+        :param model_name: The name of the model.
+        """
         return Model(self, model_name)
 
-    """
-    Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
-    Please note this Connection instance does not need to have valid authentication information since authentication
-    is only necessary for the "object" service that handles models.
-
-    :param service_name: The name of the service.
-    """
     def get_service(self, service_name):
+        """
+        Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
+        Please note this Connection instance does not need to have valid authentication information since authentication
+        is only necessary for the "object" service that handles models.
+
+        :param service_name: The name of the service.
+        """
         return Service(self.connector, service_name)
 
 class AuthenticationError(Exception):
