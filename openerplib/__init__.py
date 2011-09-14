@@ -379,7 +379,7 @@ def get_connector(hostname, protocol="xmlrpc", port="auto"):
         raise ValueError("You must choose xmlrpc or netrpc")
 
 def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
-                 login=None, password=None):
+                 login=None, password=None, user_id=None):
     """
     A shortcut method to easily create a connection to a remote OpenERP server.
 
@@ -390,6 +390,8 @@ def get_connection(hostname, protocol="xmlrpc", port='auto', database=None,
     :param database: The name of the database to work on.
     :param login: The login of the user.
     :param password: The password of the user.
+    :param user_id: The user id is a number identifying the user. This is only useful if you
+    already know it, in most cases you don't need to specify it.
     """
-    return Connection(get_connector(hostname, protocol, port), database, login, password)
+    return Connection(get_connector(hostname, protocol, port), database, login, password, user_id)
         
