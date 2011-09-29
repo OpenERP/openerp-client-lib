@@ -70,6 +70,14 @@ class Connector(object):
         self.hostname = hostname
         self.port = port
 
+    def get_service(self, service_name):
+        """
+        Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
+
+        :param service_name: The name of the service.
+        """
+        return Service(self, service_name)
+
 class XmlRPCConnector(Connector):
     """
     A type of connector that uses the XMLRPC protocol.
@@ -295,7 +303,7 @@ class Connection(object):
 
         :param service_name: The name of the service.
         """
-        return Service(self.connector, service_name)
+        return self.connector.get_service(service_name)
 
 class AuthenticationError(Exception):
     """
