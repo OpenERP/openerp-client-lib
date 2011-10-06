@@ -394,6 +394,7 @@ class Model(object):
         :return: A list of dictionaries containing all the specified fields.
         """
         record_ids = self.search(domain or [], offset, limit or False, order or False, context or {})
+        if field == ['id']: return [{'id': record_id} for record_id in record_ids]
         records = self.read(record_ids, fields or [], context or {})
         return records
 
