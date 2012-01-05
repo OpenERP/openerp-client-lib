@@ -55,6 +55,10 @@ _logger = logging.getLogger(__name__)
 def _getChildLogger(logger, subname):
     return logging.getLogger(logger.name + "." + subname)
 
+#----------------------------------------------------------
+# Connectors
+#----------------------------------------------------------
+
 class Connector(object):
     """
     The base abstract class representing a connection to an OpenERP Server.
@@ -99,6 +103,7 @@ class XmlRPCConnector(Connector):
     def send(self, service_name, method, *args):
         url = '%s/%s' % (self.url, service_name)
         service = xmlrpclib.ServerProxy(url)
+        # TODO should try except and wrap exception into LibException
         return getattr(service, method)(*args)
 
 class XmlRPCSConnector(XmlRPCConnector):
@@ -247,7 +252,7 @@ class Service(object):
         """
         self.connector = connector
         self.service_name = service_name
-        self.__logger = _getChildLogger(_getChildLogger(_logger, 'service'),service_name)
+        self.__logger = _getChildLogger(_getChildLogger(_logger, 'service'),service_name or "")
         
     def __getattr__(self, method):
         """
@@ -318,8 +323,9 @@ class Connection(object):
             return
         
         if not self.database or not self.login or self.password is None:
-            raise AuthenticationError("Creditentials not provided")
-        
+            raise AuthenticationError("Credentials not provided")
+
+        # TODO use authenticate instead of login
         self.user_id = self.get_service("common").login(self.database, self.login, self.password)
         if not self.user_id:
             raise AuthenticationError("Authentication failure")
@@ -362,7 +368,7 @@ class Model(object):
         """
         self.connection = connection
         self.model_name = model_name
-        self.__logger = _getChildLogger(_getChildLogger(_logger, 'object'), model_name)
+        self.__logger = _getChildLogger(_getChildLogger(_logger, 'object'), model_name or "")
 
     def __getattr__(self, method):
         """
