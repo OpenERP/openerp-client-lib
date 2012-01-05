@@ -236,19 +236,19 @@ class Model(object):
 
         :param method: The method for the linked model (search, read, write, unlink, create, ...)
         """
-        def proxy(*args):
+        def proxy(*args, **kw):
             """
             :param args: A list of values for the method
             """
             self.connection.check_login(False)
             self.__logger.debug(args)
-            result = self.connection.get_service('object').execute(
+            result = self.connection.get_service('object').execute_kw(
                                                     self.connection.database,
                                                     self.connection.user_id,
                                                     self.connection.password,
                                                     self.model_name,
                                                     method,
-                                                    *args)
+                                                    args, kw)
             if method == "read":
                 if isinstance(result, list) and len(result) > 0 and "id" in result[0]:
                     index = {}
