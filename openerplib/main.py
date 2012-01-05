@@ -155,6 +155,7 @@ class Connection(object):
         self.connector = connector
 
         self.set_login_info(database, login, password, user_id)
+        self.user_context = None
 
     def set_login_info(self, database, login, password, user_id=None):
         """
@@ -190,6 +191,11 @@ class Connection(object):
         if not self.user_id:
             raise AuthenticationError("Authentication failure")
         self.__logger.debug("Authenticated with user id %s", self.user_id)
+        
+    def get_user_context(self):
+        if not self.user_context:
+            self.user_context = self.get_model('res.users').context_get()
+        return self.user_context
     
     def get_model(self, model_name):
         """

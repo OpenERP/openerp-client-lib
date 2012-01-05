@@ -52,6 +52,11 @@ class TestSequenceFunctions(unittest.TestCase):
         
         self.assertEqual(res['id'], 1)
         
+    
+    def test_user_context(self):
+        connection = self.conn()
+        connection.get_user_context()
+        
         
 
 if __name__ == '__main__':
