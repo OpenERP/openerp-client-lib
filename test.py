@@ -27,3 +27,33 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # 
 ##############################################################################
+
+"""
+Some unit tests. They assume there is an OpenERP server running on localhost, on the default port
+with a database named 'test' and a user 'admin' with password 'a'.
+"""
+
+import openerplib
+import unittest
+
+class TestSequenceFunctions(unittest.TestCase):
+
+    def setUp(self):
+        pass
+    
+    def conn(self):
+        return openerplib.get_connection(hostname="localhost", protocol="xmlrpc", 
+                                         database="test", login="admin", password="a")
+
+    def test_simple(self):
+        connection = self.conn()
+        
+        res = connection.get_model("res.users").read(1)
+        
+        self.assertEqual(res['id'], 1)
+        
+        
+
+if __name__ == '__main__':
+    unittest.main()
+
