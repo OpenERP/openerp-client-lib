@@ -36,28 +36,12 @@ Code repository: https://code.launchpad.net/~niv-openerp/openerp-client-lib/trun
 """
 
 import xmlrpclib
-import logging 
-import socket
-import sys
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO
+import logging
 
 _logger = logging.getLogger(__name__)
 
 def _getChildLogger(logger, subname):
     return logging.getLogger(logger.name + "." + subname)
-
-#----------------------------------------------------------
-# Connectors
-#----------------------------------------------------------
 
 class Connector(object):
     """
@@ -103,7 +87,6 @@ class XmlRPCConnector(Connector):
     def send(self, service_name, method, *args):
         url = '%s/%s' % (self.url, service_name)
         service = xmlrpclib.ServerProxy(url)
-        # TODO should try except and wrap exception into LibException
         return getattr(service, method)(*args)
 
 class XmlRPCSConnector(XmlRPCConnector):
@@ -117,129 +100,6 @@ class XmlRPCSConnector(XmlRPCConnector):
     def __init__(self, hostname, port=8071):
         super(XmlRPCSConnector, self).__init__(hostname, port)
         self.url = 'https://%s:%d/xmlrpc' % (self.hostname, self.port)
-
-class NetRPC_Exception(Exception):
-    """
-    Exception for NetRPC errors.
-    """
-    def __init__(self, faultCode, faultString):
-        self.faultCode = faultCode
-        self.faultString = faultString
-        self.args = (faultCode, faultString)
-
-class NetRPC(object):
-    """
-    Low level class for NetRPC protocol.
-    """
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(
-            socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
-        self.sock.settimeout(120)
-    def connect(self, host, port=False):
-        if not port:
-            buf = host.split('//')[1]
-            host, port = buf.split(':')
-        self.sock.connect((host, int(port)))
-
-    def disconnect(self):
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
-
-    def mysend(self, msg, exception=False, traceback=None):
-        msg = pickle.dumps([msg,traceback])
-        size = len(msg)
-        self.sock.send('%8d' % size)
-        self.sock.send(exception and "1" or "0")
-        totalsent = 0
-        while totalsent < size:
-            sent = self.sock.send(msg[totalsent:])
-            if sent == 0:
-                raise RuntimeError, "socket connection broken"
-            totalsent = totalsent + sent
-
-    def myreceive(self):
-        buf=''
-        while len(buf) < 8:
-            chunk = self.sock.recv(8 - len(buf))
-            if chunk == '':
-                raise RuntimeError, "socket connection broken"
-            buf += chunk
-        size = int(buf)
-        buf = self.sock.recv(1)
-        if buf != "0":
-            exception = buf
-        else:
-            exception = False
-        msg = ''
-        while len(msg) < size:
-            chunk = self.sock.recv(size-len(msg))
-            if chunk == '':
-                raise RuntimeError, "socket connection broken"
-            msg = msg + chunk
-        msgio = StringIO.StringIO(msg)
-        unpickler = pickle.Unpickler(msgio)
-        unpickler.find_global = None
-        res = unpickler.load()
-
-        if isinstance(res[0],Exception):
-            if exception:
-                raise NetRPC_Exception(str(res[0]), str(res[1]))
-            raise res[0]
-        else:
-            return res[0]
-
-class NetRPCConnector(Connector):
-    """
-    A type of connector that uses the NetRPC protocol.
-    """
-
-    PROTOCOL = 'netrpc'
-    
-    __logger = _getChildLogger(_logger, 'connector.netrpc')
-
-    def __init__(self, hostname, port=8070):
-        """
-        Initialize by specifying the hostname and the port.
-        :param hostname: The hostname of the computer holding the instance of OpenERP.
-        :param port: The port used by the OpenERP instance for NetRPC (default to 8070).
-        """
-        Connector.__init__(self, hostname, port)
-
-    def send(self, service_name, method, *args):
-        socket = NetRPC()
-        socket.connect(self.hostname, self.port)
-        socket.mysend((service_name, method, )+args)
-        result = socket.myreceive()
-        socket.disconnect()
-        return result
-
-class LocalConnector(Connector):
-    """
-    A type of connector that uses the XMLRPC protocol.
-    """
-    PROTOCOL = 'local'
-    
-    __logger = _getChildLogger(_logger, 'connector.local')
-
-    def __init__(self):
-        pass
-
-    def send(self, service_name, method, *args):
-        import openerp
-        # TODO Exception handling
-        # This will be changed to be xmlrpc compatible
-        # OpenERPWarning code 1
-        # OpenERPException code 2
-        try:
-            result = openerp.netsvc.dispatch_rpc(service_name, method, args)
-        except:
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            fault = xmlrpclib.Fault(1, "%s:%s" % (exc_type, exc_value))
-            raise fault
-        return result
 
 class Service(object):
     """
@@ -418,24 +278,20 @@ class Model(object):
 
 def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
     """
-    A shortcut method to easily create a connector to a remote server using XMLRPC or NetRPC.
+    A shortcut method to easily create a connector to a remote server using XMLRPC.
 
     :param hostname: The hostname to the remote server.
-    :param protocol: The name of the protocol, must be "xmlrpc" or "netrpc".
+    :param protocol: The name of the protocol, must be "xmlrpc" or "xmlrpcs".
     :param port: The number of the port. Defaults to auto.
     """
     if port == 'auto':
-        port = 8069 if protocol=="xmlrpc" else (8070 if protocol == "netrpc" else 8071)
+        port = 8069 if protocol=="xmlrpc" else 8071
     if protocol == "xmlrpc":
         return XmlRPCConnector(hostname, port)
     elif protocol == "xmlrpcs":
         return XmlRPCSConnector(hostname, port)
-    elif protocol == "netrpc":
-        return NetRPCConnector(hostname, port)
-    elif protocol == "local":
-        return LocalConnector()
     else:
-        raise ValueError("You must choose xmlrpc(s), netrpc or local")
+        raise ValueError("You must choose xmlrpc or xmlrpcs")
 
 def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
                  login=None, password=None, user_id=None):
@@ -443,7 +299,7 @@ def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
     A shortcut method to easily create a connection to a remote OpenERP server.
 
     :param hostname: The hostname to the remote server.
-    :param protocol: The name of the protocol, must be "xmlrpc" or "netrpc".
+    :param protocol: The name of the protocol, must be "xmlrpc" or "xmlrpcs".
     :param port: The number of the port. Defaults to auto.
     :param connector: A valid Connector instance to send messages to the remote server.
     :param database: The name of the database to work on.
