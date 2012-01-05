@@ -140,7 +140,8 @@ class Connection(object):
                  database=None,
                  login=None,
                  password=None,
-                 user_id=None):
+                 user_id=None,
+                 auto_context=True):
         """
         Initialize with login information. The login information is facultative to allow specifying
         it after the initialization of this object.
@@ -151,11 +152,15 @@ class Connection(object):
         :param password: The password of the user.
         :param user_id: The user id is a number identifying the user. This is only useful if you
         already know it, in most cases you don't need to specify it.
+        :param auto_context: If true, automatically queries the context of the user and adds it to all
+        method calls on models. If a context is already specified, the contexts are merged with it (the
+        user context has the lowest priority). Default to True.
         """
         self.connector = connector
 
         self.set_login_info(database, login, password, user_id)
         self.user_context = None
+        self.auto_context = auto_context
 
     def set_login_info(self, database, login, password, user_id=None):
         """
@@ -193,8 +198,13 @@ class Connection(object):
         self.__logger.debug("Authenticated with user id %s", self.user_id)
         
     def get_user_context(self):
+        """
+        Query the default context of the user.
+        """
         if not self.user_context:
-            self.user_context = self.get_model('res.users').context_get()
+            mod = self.get_model('res.users')
+            mod.override_auto_context = False
+            self.user_context = mod.context_get()
         return self.user_context
     
     def get_model(self, model_name):
@@ -234,6 +244,7 @@ class Model(object):
         """
         self.connection = connection
         self.model_name = model_name
+        self.override_auto_context = None
         self.__logger = _getChildLogger(_getChildLogger(_logger, 'object'), model_name or "")
 
     def __getattr__(self, method):
@@ -248,6 +259,10 @@ class Model(object):
             """
             self.connection.check_login(False)
             self.__logger.debug(args)
+            if (self.override_auto_context is not None and self.override_auto_context) or \
+                (self.override_auto_context is None and self.connection.auto_context):
+                kw = dict(kw)
+                kw['context'] = dict(self.connection.get_user_context(), **kw.get('context', {}))
             result = self.connection.get_service('object').execute_kw(
                                                     self.connection.database,
                                                     self.connection.user_id,
