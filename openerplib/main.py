@@ -97,7 +97,7 @@ class XmlRPCSConnector(XmlRPCConnector):
 
     __logger = _getChildLogger(_logger, 'connector.xmlrpcs')
 
-    def __init__(self, hostname, port=8071):
+    def __init__(self, hostname, port=8069):
         super(XmlRPCSConnector, self).__init__(hostname, port)
         self.url = 'https://%s:%d/xmlrpc' % (self.hostname, self.port)
 
@@ -294,7 +294,7 @@ def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
     :param port: The number of the port. Defaults to auto.
     """
     if port == 'auto':
-        port = 8069 if protocol=="xmlrpc" else 8071
+        port = 8069
     if protocol == "xmlrpc":
         return XmlRPCConnector(hostname, port)
     elif protocol == "xmlrpcs":
