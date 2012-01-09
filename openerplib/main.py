@@ -50,15 +50,6 @@ class Connector(object):
 
     __logger = _getChildLogger(_logger, 'connector')
 
-    def __init__(self, hostname, port):
-        """
-        Initilize by specifying an hostname and a port.
-        :param hostname: Host name of the server.
-        :param port: Port for the connection to the server.
-        """
-        self.hostname = hostname
-        self.port = port
-
     def get_service(self, service_name):
         """
         Returns a Service instance to allow easy manipulation of one of the services offered by the remote server.
@@ -81,8 +72,7 @@ class XmlRPCConnector(Connector):
         :param hostname: The hostname of the computer holding the instance of OpenERP.
         :param port: The port used by the OpenERP instance for XMLRPC (default to 8069).
         """
-        Connector.__init__(self, hostname, port)
-        self.url = 'http://%s:%d/xmlrpc' % (self.hostname, self.port)
+        self.url = 'http://%s:%d/xmlrpc' % (hostname, port)
 
     def send(self, service_name, method, *args):
         url = '%s/%s' % (self.url, service_name)
@@ -99,7 +89,7 @@ class XmlRPCSConnector(XmlRPCConnector):
 
     def __init__(self, hostname, port=8069):
         super(XmlRPCSConnector, self).__init__(hostname, port)
-        self.url = 'https://%s:%d/xmlrpc' % (self.hostname, self.port)
+        self.url = 'https://%s:%d/xmlrpc' % (hostname, port)
 
 class Service(object):
     """
