@@ -82,57 +82,6 @@ class XmlRPCConnector(Connector):
         service = xmlrpclib.ServerProxy(url)
         return getattr(service, method)(*args)
 
-def json_rpc(url, fct_name, params, settings=None):
-    data = {
-        "jsonrpc": "2.0",
-        "method": fct_name,
-        "params": params,
-        "id": random.randint(0, 1000000000),
-    }
-    req = urllib2.Request(url=url, data=json.dumps(data), headers={
-        "Content-Type":"application/json",
-    })
-    result = urllib2.urlopen(req)
-    jresult = json.load(result)
-    print jresult
-    # return $.ajax(url, _.extend({}, settings, {
-    #     url: url,
-    #     dataType: 'json',
-    #     type: 'POST',
-    #     data: JSON.stringify(data),
-    #     contentType: 'application/json',
-    # })).pipe(function(result) {
-    #     if (result.error !== undefined) {
-    #         return $.Deferred().reject("server", result.error);
-    #     }
-    #     else
-    #         return result.result;
-    # }, function() {
-    #     var def = $.Deferred();
-    #     return def.reject.apply(def, ["communication"].concat(_.toArray(arguments)));
-    # });
-
-# class JsonRPCConnector(Connector):
-#     """
-#     A type of connector that uses the XMLRPC protocol.
-#     """
-#     PROTOCOL = 'xmlrpc'
-    
-#     __logger = _getChildLogger(_logger, 'connector.xmlrpc')
-
-#     def __init__(self, hostname, port=8069):
-#         """
-#         Initialize by specifying the hostname and the port.
-#         :param hostname: The hostname of the computer holding the instance of OpenERP.
-#         :param port: The port used by the OpenERP instance for XMLRPC (default to 8069).
-#         """
-#         self.url = 'http://%s:%d/xmlrpc' % (hostname, port)
-
-#     def send(self, service_name, method, *args):
-#         url = '%s/%s' % (self.url, service_name)
-#         service = xmlrpclib.ServerProxy(url)
-#         return getattr(service, method)(*args)
-
 class XmlRPCSConnector(XmlRPCConnector):
     """
     A type of connector that uses the secured XMLRPC protocol.
@@ -144,6 +93,66 @@ class XmlRPCSConnector(XmlRPCConnector):
     def __init__(self, hostname, port=8069):
         super(XmlRPCSConnector, self).__init__(hostname, port)
         self.url = 'https://%s:%d/xmlrpc' % (hostname, port)
+
+class JsonRPCException(Exception):
+    def __init__(self, error):
+         self.error = error
+    def __str__(self):
+         return repr(self.error)
+
+def json_rpc(url, fct_name, params):
+    data = {
+        "jsonrpc": "2.0",
+        "method": fct_name,
+        "params": params,
+        "id": random.randint(0, 1000000000),
+    }
+    req = urllib2.Request(url=url, data=json.dumps(data), headers={
+        "Content-Type":"application/json",
+    })
+    result = urllib2.urlopen(req)
+    result = json.load(result)
+    if result.get("error", None):
+        raise JsonRPCException(result["error"])
+    return result["result"]
+
+class JsonRPCConnector(Connector):
+    """
+    A type of connector that uses the JsonRPC protocol.
+    """
+    PROTOCOL = 'jsonrpc'
+    
+    __logger = _getChildLogger(_logger, 'connector.jsonrpc')
+
+    def __init__(self, hostname, port=8069):
+        """
+        Initialize by specifying the hostname and the port.
+        :param hostname: The hostname of the computer holding the instance of OpenERP.
+        :param port: The port used by the OpenERP instance for JsonRPC (default to 8069).
+        """
+        self.url = 'http://%s:%d/jsonrpc' % (hostname, port)
+
+    def send(self, service_name, method, *args):
+        return json_rpc(self.url, "call", {"service": service_name, "method": method, "args": args})
+
+class JsonRPCSConnector(Connector):
+    """
+    A type of connector that uses the JsonRPC protocol.
+    """
+    PROTOCOL = 'jsonrpcs'
+    
+    __logger = _getChildLogger(_logger, 'connector.jsonrpc')
+
+    def __init__(self, hostname, port=8069):
+        """
+        Initialize by specifying the hostname and the port.
+        :param hostname: The hostname of the computer holding the instance of OpenERP.
+        :param port: The port used by the OpenERP instance for JsonRPC (default to 8069).
+        """
+        self.url = 'https://%s:%d/jsonrpc' % (hostname, port)
+
+    def send(self, service_name, method, *args):
+        return json_rpc(self.url, "call", {"service": service_name, "method": method, "args": args})
 
 class Service(object):
     """
@@ -343,6 +352,10 @@ def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
         return XmlRPCConnector(hostname, port)
     elif protocol == "xmlrpcs":
         return XmlRPCSConnector(hostname, port)
+    if protocol == "jsonrpc":
+        return JsonRPCConnector(hostname, port)
+    elif protocol == "jsonrpcs":
+        return JsonRPCSConnector(hostname, port)
     else:
         raise ValueError("You must choose xmlrpc or xmlrpcs")
 
