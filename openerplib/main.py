@@ -37,6 +37,9 @@ Code repository: https://code.launchpad.net/~niv-openerp/openerp-client-lib/trun
 
 import xmlrpclib
 import logging
+import json
+import urllib2
+import random
 
 _logger = logging.getLogger(__name__)
 
@@ -78,6 +81,57 @@ class XmlRPCConnector(Connector):
         url = '%s/%s' % (self.url, service_name)
         service = xmlrpclib.ServerProxy(url)
         return getattr(service, method)(*args)
+
+def json_rpc(url, fct_name, params, settings=None):
+    data = {
+        "jsonrpc": "2.0",
+        "method": fct_name,
+        "params": params,
+        "id": random.randint(0, 1000000000),
+    }
+    req = urllib2.Request(url=url, data=json.dumps(data), headers={
+        "Content-Type":"application/json",
+    })
+    result = urllib2.urlopen(req)
+    jresult = json.load(result)
+    print jresult
+    # return $.ajax(url, _.extend({}, settings, {
+    #     url: url,
+    #     dataType: 'json',
+    #     type: 'POST',
+    #     data: JSON.stringify(data),
+    #     contentType: 'application/json',
+    # })).pipe(function(result) {
+    #     if (result.error !== undefined) {
+    #         return $.Deferred().reject("server", result.error);
+    #     }
+    #     else
+    #         return result.result;
+    # }, function() {
+    #     var def = $.Deferred();
+    #     return def.reject.apply(def, ["communication"].concat(_.toArray(arguments)));
+    # });
+
+# class JsonRPCConnector(Connector):
+#     """
+#     A type of connector that uses the XMLRPC protocol.
+#     """
+#     PROTOCOL = 'xmlrpc'
+    
+#     __logger = _getChildLogger(_logger, 'connector.xmlrpc')
+
+#     def __init__(self, hostname, port=8069):
+#         """
+#         Initialize by specifying the hostname and the port.
+#         :param hostname: The hostname of the computer holding the instance of OpenERP.
+#         :param port: The port used by the OpenERP instance for XMLRPC (default to 8069).
+#         """
+#         self.url = 'http://%s:%d/xmlrpc' % (hostname, port)
+
+#     def send(self, service_name, method, *args):
+#         url = '%s/%s' % (self.url, service_name)
+#         service = xmlrpclib.ServerProxy(url)
+#         return getattr(service, method)(*args)
 
 class XmlRPCSConnector(XmlRPCConnector):
     """
