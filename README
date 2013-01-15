@@ -65,6 +65,11 @@ Here are also some considerations about coding using the OpenERP Client Library:
 Changelog
 ---------
 
+ - 1.0.4:
+
+   - Removed netrpc handler
+   - Added call to model methods with kwargs
+
  - 1.0.2:
 
    - added dates helper
