@@ -343,7 +343,7 @@ def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
     A shortcut method to easily create a connector to a remote server using XMLRPC.
 
     :param hostname: The hostname to the remote server.
-    :param protocol: The name of the protocol, must be "xmlrpc" or "xmlrpcs".
+    :param protocol: The name of the protocol, must be "xmlrpc", "xmlrpcs", "jsonrpc" or "jsonrpcs".
     :param port: The number of the port. Defaults to auto.
     """
     if port == 'auto':
@@ -357,7 +357,7 @@ def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
     elif protocol == "jsonrpcs":
         return JsonRPCSConnector(hostname, port)
     else:
-        raise ValueError("You must choose xmlrpc or xmlrpcs")
+        raise ValueError("You must choose xmlrpc, xmlrpcs, jsonrpc or jsonrpcs")
 
 def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
                  login=None, password=None, user_id=None):
@@ -365,7 +365,7 @@ def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
     A shortcut method to easily create a connection to a remote OpenERP server.
 
     :param hostname: The hostname to the remote server.
-    :param protocol: The name of the protocol, must be "xmlrpc" or "xmlrpcs".
+    :param protocol: The name of the protocol, must be "xmlrpc", "xmlrpcs", "jsonrpc" or "jsonrpcs".
     :param port: The number of the port. Defaults to auto.
     :param connector: A valid Connector instance to send messages to the remote server.
     :param database: The name of the database to work on.

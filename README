@@ -1,8 +1,10 @@
 
 The OpenERP Client Library is a Python library to communicate with an OpenERP Server using its web
 services in an user-friendly way. It was created for those that doesn't want to code XML-RPC calls
-on the bare metal. It handles XML-RPC as well as NET-RPC protocol and provides a bunch of syntaxic
+on the bare metal. It handles XML-RPC as well as JSON-RPC protocol and provides a bunch of syntaxic
 sugar to make things a lot easier.
+
+The OpenERP Client Library is officially supported by OpenERP SA.
 
 To consult the source code repository, report bugs or ask questions, see the Launchpad Project:
 
@@ -29,10 +31,10 @@ Now copy-paste the following script describing a simple interaction with an Open
 
 In the previous script, the get_connection() method creates a Connection object that represents a
 communication channel with authentification to an OpenERP server. By default, get_connection() uses
-XML-RPC, but you can specify it to use NetRPC. You can also change the port. Example with a NetRPC
+XML-RPC, but you can specify it to use JSON-RPC. You can also change the port. Example with a JSON-RPC
 communication on port 6080: ::
 
-    connection = openerplib.get_connection(hostname="localhost", protocol="netrpc", port=6080, ...)
+    connection = openerplib.get_connection(hostname="localhost", protocol="jsonrpc", port=6080, ...)
 
 The get_model() method on the Connection object creates a Model object. That object represents a
 remote model on the OpenERP server (for OpenERP addon programmers, those are also called osv).
@@ -60,22 +62,40 @@ Here are also some considerations about coding using the OpenERP Client Library:
   inside an OpenERP addon for such cases. That way it will be executed on the OpenERP server and so it will be
   transactional.
 - The browse() method can not be used. That method returns a dynamic proxy that lazy loads the rows' data from
-  the database. That behavior is not implemented in the OpenERP Client Library but it could be in future versions.
+  the database. That behavior is not implemented in the OpenERP Client Library.
+
+Compatibility
+-------------
+
+- 1.0
+
+ - XML-RPC: OpenERP version 6.1 and superior
+
+- 1.1
+
+ - XML-RPC: OpenERP version 6.1 and superior
+
+ - JSON-RPC: OpenERP version 8.0 (upcoming) and superior
+
 
 Changelog
 ---------
 
- - 1.1.0:
+- 1.1.1:
 
-   - Added JsonRPC support
+ - Updated documentation
 
- - 1.0.4:
+- 1.1.0:
 
-   - Removed netrpc handler
-   - Added call to model methods with kwargs
+ - Added JsonRPC support
 
- - 1.0.2:
+- 1.0.4:
 
-   - added dates helper
+ - Removed netrpc handler
+ - Added call to model methods with kwargs
+
+- 1.0.2:
+
+ - added dates helper
 
 
