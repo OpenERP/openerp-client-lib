@@ -46,7 +46,7 @@ def str_to_datetime(str):
     """
     if not str:
         return str
-    return datetime.datetime.strptime(str, DEFAULT_SERVER_DATETIME_FORMAT)
+    return datetime.datetime.strptime(str.split(".")[0], DEFAULT_SERVER_DATETIME_FORMAT)
 
 def str_to_date(str):
     """
@@ -64,7 +64,7 @@ def str_to_time(str):
     """
     if not str:
         return str
-    return datetime.datetime.strptime(str, DEFAULT_SERVER_TIME_FORMAT).time()
+    return datetime.datetime.strptime(str.split(".")[0], DEFAULT_SERVER_TIME_FORMAT).time()
 
 def datetime_to_str(obj):
     """
