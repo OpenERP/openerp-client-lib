@@ -31,8 +31,6 @@
 from distutils.core import setup
 import os.path
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='openerp-client-lib',
       version='1.1.2',
@@ -41,7 +39,7 @@ setup(name='openerp-client-lib',
       author_email='niv@openerp.com',
       url='',
       packages=["openerplib"],
-      long_description=read("README"),
+      long_description="See the home page for any information: https://github.com/OpenERP/openerp-client-lib .",
       keywords="openerp library com communication rpc xml-rpc net-rpc xmlrpc python client lib web service",
       license="BSD",
       classifiers=[
